@@ -3,10 +3,18 @@ image_ripper
 
 Extracts jpeg images and PDF documents from a raw disk images
 
-The extracted files are stored in two directories: "overt" and "deleted".
+### Summary
+Tools like Autopsy can be useful for examining the contents of a disk image offline.
 
-A summary of the results are stored in a text file (by default report.txt) and the full results are stored in a sqlite database (by default ripper.sqlite)
+However, that can be cumbersome if there are a large amount of files, and you are only interested in a specific types of file.
 
+This python script uses the sleuth kit to extract all PDFs and images from a disk image, and extracts the information into a SQLite database. A human-readable text report is also generated.
+
+The extracted files are stored in two directories: `overt` and `deleted`.
+
+The text report is stored in `report.txt` (by default) and the full results are stored in `ripper.sqlite` (by default)
+
+### Dependencies
 The extraction is done by using utilities from the sleuth kit (TSK). 
 As such, it needs to be installed on the system that runs the script.
 
