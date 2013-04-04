@@ -15,7 +15,7 @@ The extracted files are stored in two directories: `overt` and `deleted`.
 The text report is stored in `report.txt` (by default) and the full results are stored in `ripper.sqlite` (by default)
 
 ### Dependencies
-The extraction is done by using utilities from the sleuth kit (TSK). 
+The extraction is done by using utilities from The Sleuth Kit (TSK). 
 As such, it needs to be installed on the system that runs the script.
 
 Additionally, it requires SQL Alchemy, PyPDF2 (from https://github.com/colemana/PyPDF2) and EXIF (from https://github.com/ianare/exif-py)
