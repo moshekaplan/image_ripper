@@ -277,9 +277,7 @@ def create_report(fname, img_name, filesystem_type, filesystem_info, total_file_
 # Main
 ###############################################################################
 
-DELETED_DEST = os.path.join('output','deleted')
-OVERT_DEST = os.path.join('output','overt')
-
+DEFAULT_OUTPUT = 'output'
 DEFAULT_DB_NAME = "ripper.sqlite"
 DEFAULT_REPORT_NAME = 'report.txt'
 
@@ -291,11 +289,16 @@ def build_argparser():
                       default=DEFAULT_REPORT_NAME,
                       help='Filename used for the report (default is %s)' % DEFAULT_REPORT_NAME)
                       
-  # DB filename  
+  # DB filename
   parser.add_argument('--db', dest='db', action='store',
                       default=DEFAULT_DB_NAME,
                       help='Filename used for the database (default is %s)' % DEFAULT_DB_NAME)
-  
+
+  # Output dir
+  parser.add_argument('--output', dest='output', action='store',
+                      default=DEFAULT_OUTPUT,
+                      help='Directory used for the database (default is %s)' % DEFAULT_OUTPUT)
+
   # Image to examine (required)
   parser.add_argument(dest='img_fname', help='The image to examine')
   return parser
@@ -306,17 +309,20 @@ def main():
   args = parser.parse_args(sys.argv[1:])
 
   img_name = args.img_fname
-  db_name = args.db
-  report_fname = args.report
+  output = args.output
+  db_name = os.path.join(output, args.db)
+  report_fname = os.path.join(output, args.report)
   
   filesystem_type = get_disk_type(img_name)
   filesystem_info = get_disk_details(img_name)
   
   undeleted, deleted = get_all_nodes(img_name)
   
-  # Move to argparser
-  overt_results = extract_all_files(img_name, undeleted, OVERT_DEST)
-  deleted_results = extract_all_files(img_name, deleted, DELETED_DEST)
+  overt_dest = os.path.join(output, 'overt')
+  deleted_dest = os.path.join(output, 'deleted')
+  
+  overt_results = extract_all_files(img_name, undeleted, overt_dest)
+  deleted_results = extract_all_files(img_name, deleted, deleted_dest)
   
   # Now we have two directories filled with image and pdf files.
   
@@ -354,8 +360,9 @@ def main():
         entry['file_metadata'] = get_exif_data(path)
     except:
       pass
-            
+  
   # Create the report:
+  
   create_report(report_fname, img_name, filesystem_type, filesystem_info, total_file_size, 
                 total_useful_size, deleted_results, overt_results)
   
