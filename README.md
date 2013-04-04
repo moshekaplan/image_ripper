@@ -6,7 +6,7 @@ Extracts jpeg images and PDF documents from a raw disk images
 ### Summary
 Tools like Autopsy can be useful for examining the contents of a disk image offline.
 
-However, that can be cumbersome if there are a large amount of files, and you are only interested in a specific types of file.
+However, that can be cumbersome if there are a large amount of files, and you are only interested in specific types of files.
 
 This python script uses the sleuth kit to extract all PDFs and images from a disk image, and extracts the information into a SQLite database. A human-readable text report is also generated.
 
