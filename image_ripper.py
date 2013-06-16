@@ -50,7 +50,7 @@ import EXIF
 ###############################################################################
 
 def get_result_from_subprocess(cmd):
-  p = subprocess.Popen(args=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  p = subprocess.Popen(args=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   out, err = p.communicate()
   return out
 
@@ -59,23 +59,26 @@ def get_result_from_subprocess(cmd):
 ###############################################################################
 
 # Uses fls to get all undeleted files:
-FLS_GET_UNDELETED = "fls -F -p -r -u '{img_name}'"
+def fls_get_undeleted(img_name):
+  return "fls -F -p -r -u".split() + [img_name]
 
 # Uses fls to get all deleted files:
-FLS_GET_DELETED =   "fls -F -p -r -d '{img_name}'"
+def fls_get_deleted(img_name):
+  return  "fls -F -p -r -d".split() + [img_name]
 
 # Use icat to retrieve a file from the image
-#TEMPFILE_NAME = 'TEMPFILE_DO_NOT_DELETE'
-ICAT_GET_FILE = "icat '{img_name}' {node}"
+def icat_get_file(img_name, node):
+  return ["icat", img_name, node]
 
 # Use fsstat to get filesystem info
-FSSTAT_GET_TYPE = "fsstat -t '{img_name}'"
-FSSTAT_GET_DETAILS = "fsstat '{img_name}'"
+def fsstat_get_type(img_name):
+  return "fsstat -t".split() + [img_name]
 
-def get_nodes_from_fls(img_name, fls_command):
-  # This makes the assumption that it will not be running with extra privileges...
-  # This must be changed if it will be released.
-  result = get_result_from_subprocess(fls_command.format(img_name=img_name))
+def fsstat_get_details(img_name):
+  return ["fsstat", img_name]
+
+def get_nodes_from_fls(fls_command):
+  result = get_result_from_subprocess(fls_command)
   entries = []
   for line in result.split('\n'):
     if not line:
@@ -90,12 +93,16 @@ def get_nodes_from_fls(img_name, fls_command):
   return entries
   
 def get_all_nodes(img_name):
-  deleted = get_nodes_from_fls(img_name, FLS_GET_DELETED)
-  undeleted = get_nodes_from_fls(img_name, FLS_GET_UNDELETED)
+  cmd = fls_get_deleted(img_name)
+  deleted = get_nodes_from_fls(cmd)
+
+  cmd = fls_get_undeleted(img_name)
+  undeleted = get_nodes_from_fls(cmd)
   return undeleted, deleted
 
 def extract_file(img_name, node, destination):
-  data = get_result_from_subprocess(ICAT_GET_FILE.format(img_name=img_name, node=node ))
+  cmd = icat_get_file(img_name=img_name, node=node)
+  data = get_result_from_subprocess(cmd)
   with open(destination, 'wb') as fh:
     fh.write(data)
   
@@ -133,19 +140,23 @@ def extract_all_files(img_name, entries, destination, delete_other=True):
   return all_results
 
 def get_disk_type(img_name):
-  return get_result_from_subprocess(FSSTAT_GET_TYPE.format(img_name=img_name))
+  cmd = fsstat_get_type(img_name=img_name)
+  return get_result_from_subprocess(cmd)
   
 def get_disk_details(img_name):
-  return get_result_from_subprocess(FSSTAT_GET_DETAILS.format(img_name=img_name))
+  cmd = fsstat_get_details(img_name=img_name)
+  return get_result_from_subprocess(cmd)
     
 ###############################################################################
 # File utils
 ###############################################################################
 
-FILE_GET_TYPE = "file -b '{fname}'"
+def file_get_type(fname):
+  return "file -b".split() + [fname]
 
 def get_file_type(fname):
-  result = get_result_from_subprocess(FILE_GET_TYPE.format(fname=fname))
+  cmd = file_get_type(fname=fname)
+  result = get_result_from_subprocess(cmd)
   if result.startswith('PDF'):
     return 'pdf'
   else:
